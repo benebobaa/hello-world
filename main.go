@@ -73,7 +73,11 @@ func handleHome(w http.ResponseWriter, r *http.Request) {
 		Environment: cfg.AppEnv,
 	}
 
-	tmpl.Execute(w, data)
+	if err := tmpl.Execute(w, data); err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 }
 
 func handleAbout(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +94,11 @@ func handleAbout(w http.ResponseWriter, r *http.Request) {
 		Message: "This is a simple Go web application demonstrating routing and templates.",
 	}
 
-	tmpl.Execute(w, data)
+	if err := tmpl.Execute(w, data); err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 }
 
 func ping(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +116,11 @@ func ping(w http.ResponseWriter, r *http.Request) {
 		UserAgent: r.UserAgent(),
 	}
 
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 }
 
 func logIncomingRequest(r *http.Request) {
