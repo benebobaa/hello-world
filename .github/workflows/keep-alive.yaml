@@ -1,9 +1,10 @@
 name: Keep-Alive Ping
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
   schedule:
-    - cron: "*/5 * * * *"
+    # Every 5 min, offset by 2 to dodge the top-of-hour surge
+    - cron: "2,7,12,17,22,27,32,37,42,47,52,57 * * * *"
 
 jobs:
   ping:
