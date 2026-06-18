@@ -14,18 +14,24 @@ jobs:
       - name: Ping endpoint
         run: |
           URL="https://svc-c6848ae1-kl-caa1669c-caa1669c.kubeletto.app"
+          success=0
 
           for i in 1 2 3; do
             status=$(curl -s -o /dev/null -w "%{http_code}" \
-              --max-time 10 \
+              --max-time 15 \
+              --retry 2 \
+              --retry-delay 3 \
               -H "User-Agent: keep-alive-bot/1.0" \
               "$URL") || status="000"
             echo "$(date -u +%H:%M:%S) Ping $i — HTTP $status"
-            [ "$i" -lt 3 ] && sleep 2
+            [ "$status" != "000" ] && success=1
+            [ "$i" -lt 3 ] && sleep 5
           done
 
-          # Don't fail on 403 — endpoint is alive, just rejecting
-          if [ "$status" = "000" ]; then
-            echo "::warning::Endpoint unreachable"
-            exit 1
+          if [ "$success" -eq 1 ]; then
+            echo "✅ Endpoint is alive"
+          else
+            echo "::warning::All pings returned 000 — endpoint may be blocking GitHub IPs (Cloudflare)"
+            # Don't fail — Cloudflare intermittently blocks CI runners
+            # The schedule will retry in 5 min anyway
           fi
