@@ -1,0 +1,27 @@
+name: Keep-Alive Ping
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every 6 hours — restarts the ping loop to stay continuous
+    - cron: "0 */6 * * *"
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350  # ~5h 50m, just under the 6h max
+    steps:
+      - name: Ping endpoint every 10s
+        run: |
+          URL="https://svc-c6848ae1-kl-caa1669c-caa1669c.kubeletto.app"
+          echo "🚀 Starting keep-alive pings to $URL"
+          echo "   Interval: 10s | Max runtime: ~5h 50m"
+
+          count=0
+          while true; do
+            count=$((count + 1))
+            status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$URL" || echo "FAIL")
+            timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            echo "[$timestamp] Ping #$count — HTTP $status"
+            sleep 10
+          done
